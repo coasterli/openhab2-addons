@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mihome"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+                          xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="sensor_ht">
+        <supported-bridge-type-refs>
+            <bridge-type-ref id="bridge"/>
+        </supported-bridge-type-refs>
+
+        <label>Temperature &amp; Humidity Sensor</label>
+        <description>Temperature &amp; Humidity Sensor</description>
+
+        <channels>
+            <channel id="temperature" typeId="temperature"/>
+            <channel id="humidity" typeId="humidity"/>
+        </channels>
+
+        <config-description>
+            <parameter name="itemId" type="text" readOnly="true">
+                <label>Item ID</label>
+                <description>Identifier that identifies an item connected to the Xiaomi Mi Smart Home Bridge.</description>
+                <required>true</required>
+            </parameter>
+        </config-description>
+    </thing-type>
+
+    <channel-type id="temperature" advanced="true">
+        <item-type>Number</item-type>
+        <label>Temperature</label>
+        <category>Temperature</category>
+        <tags>
+            <tag>weather</tag>
+        </tags>
+        <state min="-50" max="60" step="0.1" pattern="%.1f °C" readOnly="true">
+        </state>
+    </channel-type>
+    <channel-type id="humidity" advanced="true">
+        <item-type>Number</item-type>
+        <label>Humidity</label>
+        <category>Humidity</category>
+        <tags>
+            <tag>weather</tag>
+        </tags>
+        <state min="0" max="100" step="0.1" pattern="%.1f%%" readOnly="true">
+        </state>
+    </channel-type>
+</thing:thing-descriptions>

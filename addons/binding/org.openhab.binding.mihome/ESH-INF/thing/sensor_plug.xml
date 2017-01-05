@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mihome"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+                          xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="sensor_plug">
+        <supported-bridge-type-refs>
+            <bridge-type-ref id="bridge"/>
+        </supported-bridge-type-refs>
+
+        <label>Power Outlet</label>
+        <description>Power plug.</description>
+
+        <channels>
+            <channel id="powerOn" typeId="powerOn"/>
+            <channel id="loadVoltage" typeId="loadVoltage"/>
+            <channel id="loadPower" typeId="loadPower"/>
+            <channel id="powerConsumed" typeId="powerConsumed"/>
+        </channels>
+
+        <config-description>
+            <parameter name="itemId" type="text" readOnly="true">
+                <label>Item ID</label>
+                <description>Identifier that identifies an item connected to the Xiaomi Mi Smart Home Bridge.
+                </description>
+                <required>true</required>
+            </parameter>
+        </config-description>
+    </thing-type>
+
+    <channel-type id="powerOn" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Power On/Off</label>
+        <category>PowerOutlet</category>
+    </channel-type>
+    <channel-type id="loadVoltage" advanced="true">
+        <item-type>Number</item-type>
+        <label>Load Voltage</label>
+        <state pattern="%d" readOnly="true"></state>
+    </channel-type>
+    <channel-type id="loadPower" advanced="true">
+        <item-type>Number</item-type>
+        <label>Load Power</label>
+        <state pattern="%.2f" readOnly="true"></state>
+    </channel-type>
+    <channel-type id="powerConsumed" advanced="true">
+        <item-type>Number</item-type>
+        <label>Power Consumed</label>
+        <state pattern="%.2f" readOnly="true"></state>
+    </channel-type>
+</thing:thing-descriptions>

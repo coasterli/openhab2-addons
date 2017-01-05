@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mihome"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+                          xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="sensor_motion">
+        <supported-bridge-type-refs>
+            <bridge-type-ref id="bridge"/>
+        </supported-bridge-type-refs>
+
+        <label>Motion Sensor</label>
+        <description>Sensor that detects movement.</description>
+
+        <channels>
+            <channel id="motion" typeId="motion"/>
+            <channel id="lastMotion" typeId="lastMotion"/>
+        </channels>
+
+        <config-description>
+            <parameter name="itemId" type="text" readOnly="true">
+                <label>Item ID</label>
+                <description>Identifier that identifies an item connected to the Xiaomi Mi Smart Home Bridge.</description>
+                <required>true</required>
+            </parameter>
+        </config-description>
+    </thing-type>
+
+    <channel-type id="motion" advanced="true">
+        <item-type>Switch</item-type>
+        <label>Motion Status</label>
+        <!--<category>Motion</category>-->
+        <category>Switch</category>
+        <state readOnly="true"></state>
+    </channel-type>
+    <channel-type id="lastMotion" advanced="true">
+        <item-type>DateTime</item-type>
+        <label>Last Activity (Date/Time)</label>
+        <description>Date/time when last motion was detected</description>
+        <state readOnly="true"></state>
+    </channel-type>
+</thing:thing-descriptions>

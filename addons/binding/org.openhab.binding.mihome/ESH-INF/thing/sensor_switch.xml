@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mihome"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+                          xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="sensor_switch">
+        <supported-bridge-type-refs>
+            <bridge-type-ref id="bridge"/>
+        </supported-bridge-type-refs>
+
+        <label>Switch Sensor</label>
+        <description>Button sensor.</description>
+
+        <channels>
+            <channel id="button" typeId="button"/>
+        </channels>
+
+        <config-description>
+            <parameter name="itemId" type="text" readOnly="true">
+                <label>Item ID</label>
+                <description>Identifier that identifies an item connected to the Xiaomi Mi Smart Home Bridge.</description>
+                <required>true</required>
+            </parameter>
+        </config-description>
+    </thing-type>
+
+    <channel-type id="button" advanced="true">
+        <kind>trigger</kind>
+        <label>Button Event</label>
+        <event>
+            <options>
+                <option value="CLICK">click</option>
+                <option value="DOUBLE_CLICK">double click</option>
+                <option value="LONG_CLICK_PRESS">long click press</option>
+                <option value="LONG_CLICK_RELEASE">long click release</option>
+            </options>
+        </event>
+    </channel-type>
+</thing:thing-descriptions>
