@@ -93,8 +93,6 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
 
     @Override
     public void onDataReceived(String command, JsonObject message) {
-        logger.info("Received " + message.toString());
-
         String sid = message.has("sid") ? message.get("sid").getAsString() : null;
         String token = message.has("token") ? message.get("token").getAsString() : null;
 
