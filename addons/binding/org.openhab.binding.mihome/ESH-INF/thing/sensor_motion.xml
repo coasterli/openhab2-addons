@@ -29,8 +29,7 @@
     <channel-type id="motion" advanced="true">
         <item-type>Switch</item-type>
         <label>Motion Status</label>
-        <!--<category>Motion</category>-->
-        <category>Switch</category>
+        <category>Motion</category>
         <state readOnly="true"></state>
     </channel-type>
     <channel-type id="lastMotion" advanced="true">
