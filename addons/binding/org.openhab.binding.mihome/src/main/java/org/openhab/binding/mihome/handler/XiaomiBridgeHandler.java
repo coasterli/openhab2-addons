@@ -193,12 +193,19 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
 
 
     public void writeToDevice(String itemId, String[] keys, Object[] values) {
+        String encryptedKey = getEncryptedKey();
+        sendMessageToBridge("{\"cmd\": \"write\", \"sid\": \"" + itemId + "\", \"data\": \"{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + encryptedKey + "\\\"}\"}");
+    }
+
+    private String getEncryptedKey() {
         String key = (String) getConfig().get("key");
 
-        logger.info("Encrypting \"" + token + "\" with key \"" + key + "\"");
-        String encryptedKey = EncryptionHelper.encrypt(token, key);
+        if (key == null) {
+            logger.error("No key set in the gateway settings. Edit it in the configuration.");
+            return "";
+        }
 
-        sendMessageToBridge("{\"cmd\": \"write\", \"sid\": \"" + itemId + "\", \"data\": \"{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + encryptedKey + "\\\"}\"}");
+        return EncryptionHelper.encrypt(token, key);
     }
 
     private String createDataString(String[] keys, Object[] values) {
