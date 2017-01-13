@@ -241,7 +241,6 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                 case "gateway":
                     if (data.has("rgb")) {
                         long rgb = data.get("rgb").getAsLong();
-                        logger.info("Received rgb info from gateway: " + Long.toHexString(rgb));
                         updateState(CHANNEL_BRIGHTNESS, new PercentType((int) (((rgb / 256 / 256 / 256) & 0xff) / 2.55)));
                         updateState(CHANNEL_COLOR, HSBType.fromRGB((int) (rgb / 256 / 256) & 0xff, (int) (rgb / 256) & 0xff, (int) rgb & 0xff));
                     }
