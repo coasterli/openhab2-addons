@@ -20,7 +20,7 @@
         <config-description>
             <parameter name="itemId" type="text" readOnly="true">
                 <label>Item ID</label>
-                <description>Identifier that identifies an item connected to the Xiaomi Mi Smart Home Bridge.</description>
+                <description>An identifier for the item connected.</description>
                 <required>true</required>
             </parameter>
         </config-description>

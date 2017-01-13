@@ -36,7 +36,7 @@
                 <context>password</context>
                 <label>Developer Key</label>
                 <description>
-                    Delevoper key that allows writing values.
+                    Developer key that allows writing values.
                 </description>
                 <required>false</required>
             </parameter>
