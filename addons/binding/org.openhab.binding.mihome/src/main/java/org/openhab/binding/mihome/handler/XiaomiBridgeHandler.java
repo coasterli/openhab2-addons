@@ -88,7 +88,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.error("Can't handle command " + command);
+        logger.info("Gateway doesn't handle command: " + command);
     }
 
     @Override
@@ -105,6 +105,8 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
                 String device = deviceId.getAsString();
                 sendMessageToBridge("{\"cmd\": \"read\", \"sid\": \"" + device + "\"}");
             }
+            // as well get gateway status
+            sendMessageToBridge("{\"cmd\": \"read\", \"sid\": \"" + getGatewaySid() + "\"}");
         } else if (command.equals("read_ack")) {
             String model = message.get("model").getAsString();
             ThingUID thingUID = getThingUID(model, sid);
@@ -150,7 +152,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
         }
     }
 
-    public boolean registerItemListener(XiaomiItemUpdateListener listener) {
+    public synchronized boolean registerItemListener(XiaomiItemUpdateListener listener) {
         if (listener == null) {
             throw new NullPointerException("It's not allowed to pass a null XiaomiItemUpdateListener.");
         }
@@ -166,7 +168,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
         return result;
     }
 
-    public boolean unregisterItemListener(XiaomiItemUpdateListener listener) {
+    public synchronized boolean unregisterItemListener(XiaomiItemUpdateListener listener) {
         boolean result = itemListeners.remove(listener);
         if (result) {
             onUpdate();
@@ -186,15 +188,24 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
             String host = (String) config.get(HOST);
             int port = getConfigInteger(config, PORT);
             XiaomiSocket.sendMessage(message, InetAddress.getByName(host), port);
+            logger.info("Sent to bridge:" + message);
         } catch (UnknownHostException e) {
             logger.error("Could not send message to bridge", e);
         }
     }
 
-
     public void writeToDevice(String itemId, String[] keys, Object[] values) {
         String encryptedKey = getEncryptedKey();
         sendMessageToBridge("{\"cmd\": \"write\", \"sid\": \"" + itemId + "\", \"data\": \"{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + encryptedKey + "\\\"}\"}");
+    }
+
+    public void writeToBridge(String[] keys, Object[] values) {
+        String encryptedKey = getEncryptedKey();
+        sendMessageToBridge("{\"cmd\": \"write\", \"model\": \"gateway\", \"sid\": \"" + getGatewaySid() + "\", \"short_id\": \"0\", \"data\": \"{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + encryptedKey + "\\\"}\"}");
+    }
+
+    private Object getGatewaySid() {
+        return getConfig().get(SERIAL_NUMBER);
     }
 
     private String getEncryptedKey() {
@@ -270,6 +281,6 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     }
 
     private boolean isGatewayOnline() {
-        return hasItemActivity((String) getConfig().get(SERIAL_NUMBER), ONLINE_TIMEOUT);
+        return hasItemActivity((String) getGatewaySid(), ONLINE_TIMEOUT);
     }
 }

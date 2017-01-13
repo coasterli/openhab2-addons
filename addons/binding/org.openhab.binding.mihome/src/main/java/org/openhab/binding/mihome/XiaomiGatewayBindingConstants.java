@@ -20,6 +20,7 @@ public class XiaomiGatewayBindingConstants {
     public static final String BINDING_ID = "mihome";
 
     public final static ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "bridge");
+    public final static ThingTypeUID THING_TYPE_GATEWAY = new ThingTypeUID(BINDING_ID, "gateway");
     public final static ThingTypeUID THING_TYPE_SENSOR_HT = new ThingTypeUID(BINDING_ID, "sensor_ht");
     public final static ThingTypeUID THING_TYPE_SENSOR_MOTION = new ThingTypeUID(BINDING_ID, "sensor_motion");
     public final static ThingTypeUID THING_TYPE_SENSOR_SWITCH = new ThingTypeUID(BINDING_ID, "sensor_switch");
@@ -37,6 +38,10 @@ public class XiaomiGatewayBindingConstants {
     public static final String CHANNEL_LOAD_VOLTAGE = "loadVoltage";
     public static final String CHANNEL_LOAD_POWER = "loadPower";
     public static final String CHANNEL_POWER_CONSUMED = "powerConsumed";
+    // gateway light
+    public static final String CHANNEL_BRIGHTNESS = "brightness";
+    public static final String CHANNEL_COLOR = "color";
+    public static final String CHANNEL_COLOR_TEMPERATURE = "colorTemperature";
 
     // Bridge config properties
     public static final String SERIAL_NUMBER = "serialNumber";

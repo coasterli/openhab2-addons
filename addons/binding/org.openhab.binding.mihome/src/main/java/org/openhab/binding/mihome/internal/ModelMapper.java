@@ -2,16 +2,19 @@ package org.openhab.binding.mihome.internal;
 
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_GATEWAY;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_HT;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MAGNET;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MOTION;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_SWITCH;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_PLUG;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_SWITCH;
 
 public class ModelMapper {
 
     public static ThingTypeUID getThingTypeForModel(String model) {
         switch (model) {
+            case "gateway":
+                return THING_TYPE_GATEWAY;
             case "sensor_ht":
                 return THING_TYPE_SENSOR_HT;
             case "motion":
@@ -28,6 +31,8 @@ public class ModelMapper {
 
     public static String getLabelForModel(String model) {
         switch (model) {
+            case "gateway":
+                return "Gateway";
             case "sensor_ht":
                 return "Temperature & Humidity Sensor";
             case "motion":

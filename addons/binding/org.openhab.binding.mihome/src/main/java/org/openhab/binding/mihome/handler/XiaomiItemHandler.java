@@ -9,10 +9,13 @@ package org.openhab.binding.mihome.handler;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.HSBType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
+import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -22,15 +25,21 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.State;
+import org.openhab.binding.mihome.internal.ColorUtil;
 import org.openhab.binding.mihome.internal.XiaomiItemUpdateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_BRIGHTNESS;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_COLOR;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_COLOR_TEMPERATURE;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_HUMIDITY;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_IS_OPEN;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_LAST_MOTION;
@@ -41,6 +50,7 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_P
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_POWER_ON;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_TEMPERATURE;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.ITEM_ID;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_GATEWAY;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_HT;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MAGNET;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MOTION;
@@ -55,7 +65,7 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYP
  */
 public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpdateListener {
 
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_SENSOR_HT, THING_TYPE_SENSOR_MOTION, THING_TYPE_SENSOR_SWITCH, THING_TYPE_SENSOR_MAGNET, THING_TYPE_SENSOR_PLUG));
+    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_GATEWAY, THING_TYPE_SENSOR_HT, THING_TYPE_SENSOR_MOTION, THING_TYPE_SENSOR_SWITCH, THING_TYPE_SENSOR_MAGNET, THING_TYPE_SENSOR_PLUG));
 
     private static final long ONLINE_TIMEOUT = 24 * 60 * 60 * 1000;
 
@@ -106,10 +116,74 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         // TODO somehow it seems that this is called as well with LAST KNOWN STATE when openhab gets started. Can this be turned off somehow?
-        if (CHANNEL_POWER_ON.equals(channelUID.getId())) {
-            String status = command.toString().toLowerCase();
-            getXiaomiBridgeHandler().writeToDevice(itemId, new String[]{"status"}, new Object[]{status});
+        switch (channelUID.getId()) {
+            case CHANNEL_POWER_ON:
+                String status = command.toString().toLowerCase();
+                getXiaomiBridgeHandler().writeToDevice(itemId, new String[]{"status"}, new Object[]{status});
+                break;
+            case CHANNEL_BRIGHTNESS:
+                if (command instanceof PercentType) {
+                    writeBridgeLightColor(getGatewayLightColor(), ((PercentType) command).floatValue() / 100);
+                } else if (command instanceof OnOffType) {
+                    writeBridgeLightColor(getGatewayLightColor(), command == OnOffType.ON ? 1 : 0);
+                } else {
+                    logger.error("Can't handle command " + command);
+                }
+                break;
+            case CHANNEL_COLOR:
+                if (command instanceof HSBType) {
+                    writeBridgeLightColor(((HSBType) command).getRGB() & 0xffffff, getGatewayLightBrightness());
+                }
+                break;
+            case CHANNEL_COLOR_TEMPERATURE:
+                if (command instanceof PercentType) {
+                    PercentType colorTemperature = (PercentType) command;
+                    int kelvin = 48 * colorTemperature.intValue() + 1700;
+                    int color = ColorUtil.getRGBFromK(kelvin);
+                    writeBridgeLightColor(color, getGatewayLightBrightness());
+                    updateState(CHANNEL_COLOR, HSBType.fromRGB((color / 256 / 256) & 0xff, (color / 256) & 0xff, color & 0xff));
+                } else {
+                    logger.error("Can't handle command " + command);
+                }
+                break;
+
+            default:
+                logger.error("Can't handle command " + command);
+                break;
         }
+    }
+
+    private int getGatewayLightColor() {
+        Item item = getItemInChannel(CHANNEL_COLOR);
+        if (item == null) {
+            return 0xffffff;
+        }
+
+        State state = item.getState();
+        if (state != null && state instanceof HSBType) {
+            return ((HSBType) state).getRGB() & 0xffffff;
+        }
+
+        return 0xffffff;
+    }
+
+    private float getGatewayLightBrightness() {
+        Item item = getItemInChannel(CHANNEL_BRIGHTNESS);
+        if (item == null) {
+            return 1f;
+        }
+
+        State state = item.getState();
+        if (state == null) {
+            return 1f;
+        } else if (state instanceof PercentType) {
+            PercentType brightness = (PercentType) state;
+            return brightness.floatValue() / 100;
+        } else if (state instanceof OnOffType) {
+            return state == OnOffType.ON ? 1f : 0f;
+        }
+
+        return 1f;
     }
 
     @Override
@@ -164,8 +238,30 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                         updateState(CHANNEL_POWER_CONSUMED, new DecimalType(data.get("power_consumed").getAsBigDecimal()));
                     }
                     break;
+                case "gateway":
+                    if (data.has("rgb")) {
+                        long rgb = data.get("rgb").getAsLong();
+                        logger.info("Received rgb info from gateway: " + Long.toHexString(rgb));
+                        updateState(CHANNEL_BRIGHTNESS, new PercentType((int) (((rgb / 256 / 256 / 256) & 0xff) / 2.55)));
+                        updateState(CHANNEL_COLOR, HSBType.fromRGB((int) (rgb / 256 / 256) & 0xff, (int) (rgb / 256) & 0xff, (int) rgb & 0xff));
+                    }
+                    break;
             }
         }
+    }
+
+    private Item getItemInChannel(String channel) {
+        Iterator<Item> iterator = linkRegistry.getLinkedItems(thing.getChannel(channel).getUID()).iterator();
+        return iterator.hasNext() ? iterator.next() : null;
+    }
+
+    private void writeBridgeLightColor(int color, float brightness) {
+        long brightnessInt = ((long) (brightness * 255)) * 256 * 256 * 256;
+        writeBridgeLightColor((color & 0xffffff) | (brightnessInt & 0xff000000));
+    }
+
+    private void writeBridgeLightColor(long color) {
+        getXiaomiBridgeHandler().writeToBridge(new String[]{"rgb"}, new Object[]{color});
     }
 
     private synchronized XiaomiBridgeHandler getXiaomiBridgeHandler() {
