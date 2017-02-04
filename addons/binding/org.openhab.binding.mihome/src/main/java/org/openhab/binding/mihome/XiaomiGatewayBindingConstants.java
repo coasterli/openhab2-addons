@@ -26,6 +26,7 @@ public class XiaomiGatewayBindingConstants {
     public final static ThingTypeUID THING_TYPE_SENSOR_SWITCH = new ThingTypeUID(BINDING_ID, "sensor_switch");
     public final static ThingTypeUID THING_TYPE_SENSOR_MAGNET = new ThingTypeUID(BINDING_ID, "sensor_magnet");
     public final static ThingTypeUID THING_TYPE_SENSOR_PLUG = new ThingTypeUID(BINDING_ID, "sensor_plug");
+    public final static ThingTypeUID THING_TYPE_SENSOR_CUBE = new ThingTypeUID(BINDING_ID, "sensor_cube");
 
     // List of all Channel ids
     public static final String CHANNEL_TEMPERATURE = "temperature";

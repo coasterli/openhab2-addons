@@ -10,6 +10,7 @@ package org.openhab.binding.mihome.internal;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_GATEWAY;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_CUBE;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_HT;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MAGNET;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MOTION;
@@ -37,6 +38,8 @@ public class ModelMapper {
                 return THING_TYPE_SENSOR_MAGNET;
             case "plug":
                 return THING_TYPE_SENSOR_PLUG;
+            case "cube":
+                return THING_TYPE_SENSOR_CUBE;
         }
         return null;
     }
@@ -55,6 +58,8 @@ public class ModelMapper {
                 return "Button";
             case "plug":
                 return "Plug";
+            case "cube":
+                return "Magic Controller (Cube)";
         }
         return null;
     }

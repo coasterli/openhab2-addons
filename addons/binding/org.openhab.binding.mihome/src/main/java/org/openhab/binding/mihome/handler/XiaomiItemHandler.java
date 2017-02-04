@@ -51,6 +51,7 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_P
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_TEMPERATURE;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.ITEM_ID;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_GATEWAY;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_CUBE;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_HT;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MAGNET;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MOTION;
@@ -65,7 +66,7 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYP
  */
 public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpdateListener {
 
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_GATEWAY, THING_TYPE_SENSOR_HT, THING_TYPE_SENSOR_MOTION, THING_TYPE_SENSOR_SWITCH, THING_TYPE_SENSOR_MAGNET, THING_TYPE_SENSOR_PLUG));
+    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_GATEWAY, THING_TYPE_SENSOR_HT, THING_TYPE_SENSOR_MOTION, THING_TYPE_SENSOR_SWITCH, THING_TYPE_SENSOR_MAGNET, THING_TYPE_SENSOR_PLUG, THING_TYPE_SENSOR_CUBE));
 
     private static final long ONLINE_TIMEOUT = 24 * 60 * 60 * 1000;
 
@@ -214,7 +215,7 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                     break;
                 case "switch":
                     if (data.has("status")) {
-                        triggerChannel("button", data.get("status").getAsString());
+                        triggerChannel("button", data.get("status").getAsString().toUpperCase());
                     }
                     break;
                 case "magnet":
@@ -243,6 +244,15 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                         long rgb = data.get("rgb").getAsLong();
                         updateState(CHANNEL_BRIGHTNESS, new PercentType((int) (((rgb / 256 / 256 / 256) & 0xff) / 2.55)));
                         updateState(CHANNEL_COLOR, HSBType.fromRGB((int) (rgb / 256 / 256) & 0xff, (int) (rgb / 256) & 0xff, (int) rgb & 0xff));
+                    }
+                    break;
+                case "cube":
+                    System.out.println("Cube data:" + data);
+                    if (data.has("status")) {
+                        triggerChannel("action", data.get("status").getAsString().toUpperCase());
+                    } else if (data.has("rotate")) {
+                        boolean isRotateLeft = data.get("status").getAsString().startsWith("-");
+                        triggerChannel("action", isRotateLeft ? "ROTATE_LEFT" : "ROTATE_RIGHT");
                     }
                     break;
             }
