@@ -9,8 +9,8 @@
             <bridge-type-ref id="bridge"/>
         </supported-bridge-type-refs>
 
-        <label>Open/closed Sensor</label>
-        <description>Open/closed sensor for door or windows.</description>
+        <label>Door/Window Sensor</label>
+        <description>Sensor for Door/Window to detect open/closed state.</description>
 
         <channels>
             <channel id="isOpen" typeId="isOpen"/>

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.mihome.internal.discovery;
 
 import com.google.gson.JsonObject;
@@ -20,6 +27,11 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.ITEM_ID;
 import static org.openhab.binding.mihome.internal.ModelMapper.getLabelForModel;
 import static org.openhab.binding.mihome.internal.ModelMapper.getThingTypeForModel;
 
+/**
+ * Discovery service for items/sensors.
+ *
+ * @author Patrick Boos - Initial contribution
+ */
 public class XiaomiItemDiscoveryService extends AbstractDiscoveryService implements XiaomiItemUpdateListener {
 
     private static final int DISCOVERY_TIMEOUT = 10;

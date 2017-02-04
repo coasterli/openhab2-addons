@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.mihome.internal;
 
 import javax.crypto.Cipher;
@@ -5,7 +12,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Created by Ondřej Pečta on 29. 12. 2016.
+ * Encrypts communication between openhab & xiaomi bridge (required by xiaomi).
+ *
+ * @author Ondřej Pečta - 29. 12. 2016
  */
 public class EncryptionHelper {
 

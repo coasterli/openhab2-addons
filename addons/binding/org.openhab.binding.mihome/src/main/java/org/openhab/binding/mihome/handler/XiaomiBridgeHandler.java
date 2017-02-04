@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.mihome.handler;
 
 import com.google.gson.JsonArray;
@@ -39,6 +46,12 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.SERIAL_NU
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_BRIDGE;
 import static org.openhab.binding.mihome.internal.ModelMapper.getThingTypeForModel;
 
+/**
+ * The {@link XiaomiBridgeHandler} is responsible for handling commands, which are
+ * sent to one of the channels for the bridge.
+ *
+ * @author Patrick Boos - Initial contribution
+ */
 public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements XiaomiSocketListener {
 
     private final static int ONLINE_TIMEOUT = 30000;
@@ -94,19 +107,20 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     @Override
     public void onDataReceived(String command, JsonObject message) {
         String sid = message.has("sid") ? message.get("sid").getAsString() : null;
+
         String token = message.has("token") ? message.get("token").getAsString() : null;
+        if (token != null) {
+            this.token = token;
+        }
 
         if (command.equals("get_id_list_ack")) {
-            // TODO do something with the token?
-            //String token = data.get("token").getAsString();
-
             JsonArray devices = parser.parse(message.get("data").getAsString()).getAsJsonArray();
             for (JsonElement deviceId : devices) {
                 String device = deviceId.getAsString();
-                sendMessageToBridge("{\"cmd\": \"read\", \"sid\": \"" + device + "\"}");
+                sendCommandToBridge("read", device);
             }
             // as well get gateway status
-            sendMessageToBridge("{\"cmd\": \"read\", \"sid\": \"" + getGatewaySid() + "\"}");
+            sendCommandToBridge("read", getGatewaySid());
         } else if (command.equals("read_ack")) {
             String model = message.get("model").getAsString();
             ThingUID thingUID = getThingUID(model, sid);
@@ -123,9 +137,6 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
             if (isGatewayOnline()) {
                 updateStatus(ThingStatus.ONLINE);
             }
-        }
-        if (token != null) {
-            this.token = token;
         }
 
         notifyListeners(command, message);
@@ -182,7 +193,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
         }
     }
 
-    public void sendMessageToBridge(String message) {
+    private void sendMessageToBridge(String message) {
         try {
             Configuration config = getThing().getConfiguration();
             String host = (String) config.get(HOST);
@@ -194,18 +205,55 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
         }
     }
 
-    public void writeToDevice(String itemId, String[] keys, Object[] values) {
-        String encryptedKey = getEncryptedKey();
-        sendMessageToBridge("{\"cmd\": \"write\", \"sid\": \"" + itemId + "\", \"data\": \"{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + encryptedKey + "\\\"}\"}");
+    private void sendCommandToBridge(String cmd) {
+        sendCommandToBridge(cmd, null, null, null);
     }
 
-    public void writeToBridge(String[] keys, Object[] values) {
-        String encryptedKey = getEncryptedKey();
-        sendMessageToBridge("{\"cmd\": \"write\", \"model\": \"gateway\", \"sid\": \"" + getGatewaySid() + "\", \"short_id\": \"0\", \"data\": \"{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + encryptedKey + "\\\"}\"}");
+    private void sendCommandToBridge(String cmd, String[] keys, Object[] values) {
+        sendCommandToBridge(cmd, null, keys, values);
     }
 
-    private Object getGatewaySid() {
-        return getConfig().get(SERIAL_NUMBER);
+    private void sendCommandToBridge(String cmd, String sid) {
+        sendCommandToBridge(cmd, sid, null, null);
+    }
+
+    private void sendCommandToBridge(String cmd, String sid, String[] keys, Object[] values) {
+        StringBuilder message = new StringBuilder("{");
+        message.append("\"cmd\": \"").append(cmd).append("\"");
+        if (sid != null) {
+            message.append("\"sid\": \"").append(sid).append("\"");
+        }
+        if (keys != null) {
+            for (int i = 0; i < keys.length; i++) {
+                message.append(",").append("\"").append(keys[i]).append("\"").append(": ");
+
+                //write value
+                message.append(toJsonValue(values[i]));
+            }
+        }
+        message.append("}");
+
+        sendMessageToBridge(message.toString());
+    }
+
+    void writeToDevice(String itemId, String[] keys, Object[] values) {
+        sendCommandToBridge("write",
+                new String[]{"sid", "data"},
+                new Object[]{itemId, createDataJsonString(keys, values)});
+    }
+
+    void writeToBridge(String[] keys, Object[] values) {
+        sendCommandToBridge("write",
+                new String[]{"model", "sid", "short_id", "data"},
+                new Object[]{"gateway", getGatewaySid(), "0", createDataJsonString(keys, values)});
+    }
+
+    private String createDataJsonString(String[] keys, Object[] values) {
+        return "{" + createDataString(keys, values) + ", \\\"key\\\": \\\"" + getEncryptedKey() + "\"}";
+    }
+
+    private String getGatewaySid() {
+        return (String) getConfig().get(SERIAL_NUMBER);
     }
 
     private String getEncryptedKey() {
@@ -221,32 +269,33 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
 
     private String createDataString(String[] keys, Object[] values) {
         StringBuilder builder = new StringBuilder();
-        boolean first = true;
 
         if (keys.length != values.length)
             return "";
 
         for (int i = 0; i < keys.length; i++) {
-            String k = keys[i];
-            if (!first)
+            if (i > 0) {
                 builder.append(",");
-            else
-                first = false;
+            }
 
             //write key
-            builder.append("\\\"").append(k).append("\\\"").append(": ");
+            builder.append("\\\"").append(keys[i]).append("\\\"").append(": ");
 
             //write value
-            builder.append(getValue(values[i]));
+            builder.append(escapeQuotes(toJsonValue(values[i])));
         }
         return builder.toString();
     }
 
-    private String getValue(Object o) {
+    private String toJsonValue(Object o) {
         if (o instanceof String) {
-            return "\\\"" + o + "\\\"";
+            return "\"" + o + "\"";
         } else
             return o.toString();
+    }
+
+    private String escapeQuotes(String string) {
+        return string.replaceAll("\"", "\\\\\"");
     }
 
     private int getConfigInteger(Configuration config, String key) {
@@ -267,11 +316,11 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     }
 
     private void forceDiscovery() {
-        sendMessageToBridge("{\"cmd\": \"get_id_list\"}");
+        sendCommandToBridge("get_id_list");
         lastDiscoveryTime = System.currentTimeMillis();
     }
 
-    public boolean hasItemActivity(String itemId, long withinLastMillis) {
+    boolean hasItemActivity(String itemId, long withinLastMillis) {
         Long lastOnlineTimeMillis = lastOnlineMap.get(itemId);
         return lastOnlineTimeMillis != null && System.currentTimeMillis() - lastOnlineTimeMillis < withinLastMillis;
     }
@@ -281,6 +330,6 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     }
 
     private boolean isGatewayOnline() {
-        return hasItemActivity((String) getGatewaySid(), ONLINE_TIMEOUT);
+        return hasItemActivity(getGatewaySid(), ONLINE_TIMEOUT);
     }
 }

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.mihome.internal;
 
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -9,6 +16,11 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYP
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_PLUG;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_SWITCH;
 
+/**
+ * Maps the model (provided from xiaomi) to thing.
+ *
+ * @author Patrick Boos - Initial contribution
+ */
 public class ModelMapper {
 
     public static ThingTypeUID getThingTypeForModel(String model) {

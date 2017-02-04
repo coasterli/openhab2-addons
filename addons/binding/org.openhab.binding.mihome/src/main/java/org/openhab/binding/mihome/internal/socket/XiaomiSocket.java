@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.mihome.internal.socket;
 
 import com.google.gson.JsonObject;
@@ -13,6 +20,11 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Takes care of the communication with the bridge.
+ *
+ * @author Patrick Boos - Initial contribution
+ */
 public class XiaomiSocket {
     private static final int BUFFER_LENGTH = 1024;
     //private final int DEST_PORT = 9898;

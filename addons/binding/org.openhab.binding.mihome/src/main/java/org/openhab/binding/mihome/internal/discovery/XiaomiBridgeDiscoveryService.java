@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014-2016 by the respective copyright holders.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.mihome.internal.discovery;
 
 import com.google.gson.JsonObject;
@@ -22,6 +29,11 @@ import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.PORT;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.SERIAL_NUMBER;
 import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_BRIDGE;
 
+/**
+ * Discovery service for the xiaomi bridge.
+ *
+ * @author Patrick Boos - Initial contribution
+ */
 public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService implements XiaomiSocketListener {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_BRIDGE);
