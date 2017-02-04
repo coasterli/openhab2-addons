@@ -62,11 +62,11 @@ public class XiaomiSocket {
     private static void setupSocket() {
         synchronized (XiaomiSocket.class) {
             try {
-                logger.info("Setup socket");
+                logger.debug("Setup socket");
                 // TODO check if this can be any port. if yes, than we can have a socket for each discovery, and each bridge
                 socket = new MulticastSocket(DEFAULT_PORT); // must bind receive side
                 socket.joinGroup(InetAddress.getByName(MCAST_ADDR));
-                logger.info("network interface: " + socket.getNetworkInterface().getName());
+                logger.debug("network interface: " + socket.getNetworkInterface().getName());
             } catch (IOException e) {
                 logger.error("Setup socket error", e);
             }
@@ -82,7 +82,7 @@ public class XiaomiSocket {
                 socketReceiveThread.interrupt();
             }
             if (socket != null) {
-                logger.info("Socket closed");
+                logger.debug("Socket closed");
                 socket.close();
                 socket = null;
             }
@@ -102,7 +102,7 @@ public class XiaomiSocket {
             byte[] sendData = message.getBytes("UTF-8");
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, address, port);
             socket.send(sendPacket);
-            logger.info("Sent message: " + message);
+            logger.debug("Sent message: " + message);
         } catch (IOException e) {
             logger.error("Sending error", e);
         }
@@ -133,7 +133,7 @@ public class XiaomiSocket {
                 }
             }
 
-            logger.info("Receiver thread ended");
+            logger.debug("Receiver thread ended");
         }
     }
 }

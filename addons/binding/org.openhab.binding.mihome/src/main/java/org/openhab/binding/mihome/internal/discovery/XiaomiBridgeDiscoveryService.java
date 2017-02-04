@@ -47,7 +47,7 @@ public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService imple
 
     @Override
     protected void startScan() {
-        logger.info("Start scan");
+        logger.debug("Start scan");
         XiaomiSocket.registerListener(this);
 
         discoverGateways();
@@ -98,7 +98,7 @@ public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService imple
         properties.put(HOST, ipAddress);
         properties.put(PORT, port);
 
-        logger.info("Discovered Xiaomi Gateway - sid: " + serialNumber + " ip: " + ipAddress + " port: " + port);
+        logger.debug("Discovered Xiaomi Gateway - sid: " + serialNumber + " ip: " + ipAddress + " port: " + port);
 
         ThingUID thingUID = new ThingUID(THING_TYPE_BRIDGE, serialNumber);
         thingDiscovered(DiscoveryResultBuilder.create(thingUID)

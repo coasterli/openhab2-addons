@@ -101,7 +101,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.info("Gateway doesn't handle command: " + command);
+        logger.warn("Gateway doesn't handle command: " + command);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
             String host = (String) config.get(HOST);
             int port = getConfigInteger(config, PORT);
             XiaomiSocket.sendMessage(message, InetAddress.getByName(host), port);
-            logger.info("Sent to bridge:" + message);
+            logger.debug("Sent to bridge:" + message);
         } catch (UnknownHostException e) {
             logger.error("Could not send message to bridge", e);
         }

@@ -46,7 +46,7 @@ public class XiaomiItemDiscoveryService extends AbstractDiscoveryService impleme
 
     @Override
     protected void startScan() {
-        logger.info("Start scan");
+        logger.debug("Start scan");
         xiaomiBridgeHandler.registerItemListener(this); // this will as well get us all items
 
         waitUntilEnded();
@@ -93,7 +93,7 @@ public class XiaomiItemDiscoveryService extends AbstractDiscoveryService impleme
     public void onItemUpdate(String sid, String command, JsonObject data) {
         if (command.equals("read_ack") || command.equals("report")) {
             String model = data.get("model").getAsString();
-            logger.info("Detected Xiaomi smart device - sid: " + sid + " model: " + model);
+            logger.debug("Detected Xiaomi smart device - sid: " + sid + " model: " + model);
 
             ThingTypeUID thingType = getThingTypeForModel(model);
             if (thingType == null) {

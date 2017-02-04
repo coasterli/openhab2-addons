@@ -191,7 +191,7 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
     public void onItemUpdate(String sid, String command, JsonObject message) {
         if (itemId != null && itemId.equals(sid)) {
             updateItemStatus();
-            logger.info("Item got update: " + message.toString());
+            logger.debug("Item got update: " + message.toString());
 
             JsonObject data = parser.parse(message.get("data").getAsString()).getAsJsonObject();
             String model = message.get("model").getAsString();
