@@ -7,7 +7,15 @@
  */
 package org.openhab.binding.mihome.internal.discovery;
 
-import com.google.gson.JsonObject;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.ITEM_ID;
+import static org.openhab.binding.mihome.internal.ModelMapper.*;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -17,15 +25,7 @@ import org.openhab.binding.mihome.internal.XiaomiItemUpdateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.ITEM_ID;
-import static org.openhab.binding.mihome.internal.ModelMapper.getLabelForModel;
-import static org.openhab.binding.mihome.internal.ModelMapper.getThingTypeForModel;
+import com.google.gson.JsonObject;
 
 /**
  * Discovery service for items/sensors.
@@ -93,11 +93,11 @@ public class XiaomiItemDiscoveryService extends AbstractDiscoveryService impleme
     public void onItemUpdate(String sid, String command, JsonObject data) {
         if (command.equals("read_ack") || command.equals("report")) {
             String model = data.get("model").getAsString();
-            logger.debug("Detected Xiaomi smart device - sid: " + sid + " model: " + model);
+            logger.debug("Detected Xiaomi smart device - sid: {} model: {}", sid, model);
 
             ThingTypeUID thingType = getThingTypeForModel(model);
             if (thingType == null) {
-                logger.error("Unknown discovered model: " + model);
+                logger.error("Unknown discovered model: {}", model);
                 return;
             }
 
@@ -105,13 +105,9 @@ public class XiaomiItemDiscoveryService extends AbstractDiscoveryService impleme
             properties.put(ITEM_ID, sid);
 
             ThingUID thingUID = new ThingUID(thingType, sid);
-            thingDiscovered(DiscoveryResultBuilder.create(thingUID)
-                    .withThingType(thingType)
-                    .withProperties(properties)
-                    .withRepresentationProperty(ITEM_ID)
-                    .withLabel(getLabelForModel(model))
-                    .withBridge(xiaomiBridgeHandler.getThing().getUID())
-                    .build());
+            thingDiscovered(DiscoveryResultBuilder.create(thingUID).withThingType(thingType).withProperties(properties)
+                    .withRepresentationProperty(ITEM_ID).withLabel(getLabelForModel(model))
+                    .withBridge(xiaomiBridgeHandler.getThing().getUID()).build());
         }
     }
 }

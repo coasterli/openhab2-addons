@@ -9,12 +9,14 @@
             <bridge-type-ref id="bridge"/>
         </supported-bridge-type-refs>
 
-        <label>Motion Sensor</label>
-        <description>Sensor that detects movement.</description>
+        <label>Xiaomi Mi Motion Sensor</label>
+        <description>Sensor that detects movement. Also called Occupancy Sensor or Human Body Sensor. After it detects motion, it goes to sleep for 1 minute.</description>
 
         <channels>
             <channel id="motion" typeId="motion"/>
             <channel id="lastMotion" typeId="lastMotion"/>
+            <channel id="voltage" typeId="voltage"/>
+            <channel id="batteryLevel" typeId="batteryLevel"/>
         </channels>
 
         <config-description>
@@ -26,16 +28,35 @@
         </config-description>
     </thing-type>
 
-    <channel-type id="motion" advanced="true">
+    <channel-type id="motion">
         <item-type>Switch</item-type>
         <label>Motion Status</label>
         <category>Motion</category>
         <state readOnly="true"></state>
     </channel-type>
-    <channel-type id="lastMotion" advanced="true">
+    
+    <channel-type id="lastMotion">
         <item-type>DateTime</item-type>
         <label>Last Activity (Date/Time)</label>
         <description>Date/time when last motion was detected</description>
         <state readOnly="true"></state>
     </channel-type>
+    
+    <channel-type id="voltage">
+        <item-type>Number</item-type>
+        <label>Battery Voltage</label>
+        <category>Battery Voltage</category>
+        <state pattern="%d mv" readOnly="true"></state>
+    </channel-type>
+
+    <channel-type id="batteryLevel">
+        <kind>trigger</kind>
+        <label>Battery Level</label>
+        <event>
+            <options>
+                <option value="LOW">low</option>
+            </options>
+        </event>
+    </channel-type>
+    
 </thing:thing-descriptions>

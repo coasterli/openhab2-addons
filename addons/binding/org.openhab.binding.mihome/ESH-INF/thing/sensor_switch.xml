@@ -9,11 +9,13 @@
             <bridge-type-ref id="bridge"/>
         </supported-bridge-type-refs>
 
-        <label>Switch Sensor</label>
-        <description>Button sensor.</description>
+        <label>Xiaomi Mi Wireless Switch</label>
+        <description>Round-shaped mini wireless switch that allows to trigger three types of event: single click, double click and long click.</description>
 
         <channels>
             <channel id="button" typeId="button"/>
+            <channel id="voltage" typeId="voltage"/>
+            <channel id="batteryLevel" typeId="batteryLevel"/>
         </channels>
 
         <config-description>
@@ -25,7 +27,7 @@
         </config-description>
     </thing-type>
 
-    <channel-type id="button" advanced="true">
+    <channel-type id="button">
         <kind>trigger</kind>
         <label>Button Event</label>
         <event>
@@ -37,4 +39,22 @@
             </options>
         </event>
     </channel-type>
+
+    <channel-type id="voltage">
+        <item-type>Number</item-type>
+        <label>Battery Voltage</label>
+        <category>Battery Voltage</category>
+        <state pattern="%d mv" readOnly="true"></state>
+    </channel-type>
+
+    <channel-type id="batteryLevel">
+        <kind>trigger</kind>
+        <label>Battery Level</label>
+        <event>
+            <options>
+                <option value="LOW">low</option>
+            </options>
+        </event>
+    </channel-type>
+    
 </thing:thing-descriptions>

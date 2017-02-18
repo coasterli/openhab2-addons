@@ -7,10 +7,22 @@
  */
 package org.openhab.binding.mihome.handler;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.*;
+import static org.openhab.binding.mihome.internal.ModelMapper.getThingTypeForModel;
+
+import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.thing.Bridge;
@@ -27,24 +39,10 @@ import org.openhab.binding.mihome.internal.socket.XiaomiSocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.HOST;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.PORT;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.SERIAL_NUMBER;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_BRIDGE;
-import static org.openhab.binding.mihome.internal.ModelMapper.getThingTypeForModel;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * The {@link XiaomiBridgeHandler} is responsible for handling commands, which are
@@ -101,7 +99,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.warn("Gateway doesn't handle command: " + command);
+        logger.debug("Gateway doesn't handle command: {}", command);
     }
 
     @Override
@@ -145,7 +143,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     private ThingUID getThingUID(String model, String sid) {
         ThingTypeUID thingType = getThingTypeForModel(model);
         if (thingType == null) {
-            logger.error("Unknown discovered model: " + model);
+            logger.error("Unknown discovered model: {}", model);
             return null;
         }
 
@@ -199,7 +197,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
             String host = (String) config.get(HOST);
             int port = getConfigInteger(config, PORT);
             XiaomiSocket.sendMessage(message, InetAddress.getByName(host), port);
-            logger.debug("Sent to bridge:" + message);
+            logger.debug("Sent to bridge: {}", message);
         } catch (UnknownHostException e) {
             logger.error("Could not send message to bridge", e);
         }
@@ -227,7 +225,7 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
             for (int i = 0; i < keys.length; i++) {
                 message.append(",").append("\"").append(keys[i]).append("\"").append(": ");
 
-                //write value
+                // write value
                 message.append(toJsonValue(values[i]));
             }
         }
@@ -237,15 +235,13 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     }
 
     void writeToDevice(String itemId, String[] keys, Object[] values) {
-        sendCommandToBridge("write",
-                new String[]{"sid", "data"},
-                new Object[]{itemId, createDataJsonString(keys, values)});
+        sendCommandToBridge("write", new String[] { "sid", "data" },
+                new Object[] { itemId, createDataJsonString(keys, values) });
     }
 
     void writeToBridge(String[] keys, Object[] values) {
-        sendCommandToBridge("write",
-                new String[]{"model", "sid", "short_id", "data"},
-                new Object[]{"gateway", getGatewaySid(), "0", createDataJsonString(keys, values)});
+        sendCommandToBridge("write", new String[] { "model", "sid", "short_id", "data" },
+                new Object[] { "gateway", getGatewaySid(), "0", createDataJsonString(keys, values) });
     }
 
     private String createDataJsonString(String[] keys, Object[] values) {
@@ -270,18 +266,19 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     private String createDataString(String[] keys, Object[] values) {
         StringBuilder builder = new StringBuilder();
 
-        if (keys.length != values.length)
+        if (keys.length != values.length) {
             return "";
+        }
 
         for (int i = 0; i < keys.length; i++) {
             if (i > 0) {
                 builder.append(",");
             }
 
-            //write key
+            // write key
             builder.append("\\\"").append(keys[i]).append("\\\"").append(": ");
 
-            //write value
+            // write value
             builder.append(escapeQuotes(toJsonValue(values[i])));
         }
         return builder.toString();
@@ -290,8 +287,9 @@ public class XiaomiBridgeHandler extends ConfigStatusBridgeHandler implements Xi
     private String toJsonValue(Object o) {
         if (o instanceof String) {
             return "\"" + o + "\"";
-        } else
+        } else {
             return o.toString();
+        }
     }
 
     private String escapeQuotes(String string) {

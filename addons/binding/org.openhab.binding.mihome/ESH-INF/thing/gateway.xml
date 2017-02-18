@@ -9,8 +9,11 @@
             <bridge-type-ref id="bridge"/>
         </supported-bridge-type-refs>
 
-        <label>Gateway</label>
-        <description>Gateway</description>
+        <label>Xiaomi Mi Smart Home Gateway</label>
+        <description>Multifunctional Gateway. One button click turns on/off the device. Two clicks toggle "home security" feature. 
+        Three button clicks allow you to link the Xiaomi Zigbee devices with the Gateway. After you press the button 3 times, the light will flash blue;
+        After that you'll be able to add new sensors by pressing their hole button for 3 seconds.
+        </description>
 
         <channels>
             <channel id="brightness" typeId="brightness"/>
@@ -39,22 +42,25 @@
             <tag>Lighting</tag>
         </tags>
     </channel-type>
+
     <channel-type id="color">
         <item-type>Color</item-type>
         <label>Color</label>
-        <description>The color channel allows to control the color of a light.</description>
+        <description>Control the color of light.</description>
         <category>ColorLight</category>
         <tags>
             <tag>Lighting</tag>
         </tags>
     </channel-type>
+
     <channel-type id="colorTemperature">
         <item-type>Dimmer</item-type>
-        <label>ColorTemperature</label>
-        <description>The CT channel allows to control the CT of a light.</description>
+        <label>Color Temperature</label>
+        <description>Allows to control the color temperature of light.</description>
         <category>DimmableCT</category>
         <tags>
             <tag>ColorTemperature</tag>
         </tags>
     </channel-type>
+
 </thing:thing-descriptions>

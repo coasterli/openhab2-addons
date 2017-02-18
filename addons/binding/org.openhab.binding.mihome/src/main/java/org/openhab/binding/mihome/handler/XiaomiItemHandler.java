@@ -7,8 +7,14 @@
  */
 package org.openhab.binding.mihome.handler;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -31,42 +37,21 @@ import org.openhab.binding.mihome.internal.XiaomiItemUpdateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_BRIGHTNESS;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_COLOR;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_COLOR_TEMPERATURE;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_HUMIDITY;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_IS_OPEN;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_LAST_MOTION;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_LOAD_POWER;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_LOAD_VOLTAGE;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_MOTION;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_POWER_CONSUMED;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_POWER_ON;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.CHANNEL_TEMPERATURE;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.ITEM_ID;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_GATEWAY;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_CUBE;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_HT;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MAGNET;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MOTION;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_PLUG;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_SWITCH;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * The {@link XiaomiItemHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Patrick Boos - Initial contribution
+ * @author Kuba Wolanin - Added voltage and low battery report
  */
 public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpdateListener {
 
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(Arrays.asList(THING_TYPE_GATEWAY, THING_TYPE_SENSOR_HT, THING_TYPE_SENSOR_MOTION, THING_TYPE_SENSOR_SWITCH, THING_TYPE_SENSOR_MAGNET, THING_TYPE_SENSOR_PLUG, THING_TYPE_SENSOR_CUBE));
+    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = new HashSet<>(
+            Arrays.asList(THING_TYPE_GATEWAY, THING_TYPE_SENSOR_HT, THING_TYPE_SENSOR_MOTION, THING_TYPE_SENSOR_SWITCH,
+                    THING_TYPE_SENSOR_MAGNET, THING_TYPE_SENSOR_PLUG, THING_TYPE_SENSOR_CUBE));
 
     private static final long ONLINE_TIMEOUT = 24 * 60 * 60 * 1000;
 
@@ -116,11 +101,12 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        // TODO somehow it seems that this is called as well with LAST KNOWN STATE when openhab gets started. Can this be turned off somehow?
+        // TODO somehow it seems that this is called as well with LAST KNOWN STATE when openhab gets started. Can this
+        // be turned off somehow?
         switch (channelUID.getId()) {
             case CHANNEL_POWER_ON:
                 String status = command.toString().toLowerCase();
-                getXiaomiBridgeHandler().writeToDevice(itemId, new String[]{"status"}, new Object[]{status});
+                getXiaomiBridgeHandler().writeToDevice(itemId, new String[] { "status" }, new Object[] { status });
                 break;
             case CHANNEL_BRIGHTNESS:
                 if (command instanceof PercentType) {
@@ -142,14 +128,15 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                     int kelvin = 48 * colorTemperature.intValue() + 1700;
                     int color = ColorUtil.getRGBFromK(kelvin);
                     writeBridgeLightColor(color, getGatewayLightBrightness());
-                    updateState(CHANNEL_COLOR, HSBType.fromRGB((color / 256 / 256) & 0xff, (color / 256) & 0xff, color & 0xff));
+                    updateState(CHANNEL_COLOR,
+                            HSBType.fromRGB((color / 256 / 256) & 0xff, (color / 256) & 0xff, color & 0xff));
                 } else {
-                    logger.error("Can't handle command " + command);
+                    logger.error("Can't handle command {}", command);
                 }
                 break;
 
             default:
-                logger.error("Can't handle command " + command);
+                logger.error("Can't handle command {}", command);
                 break;
         }
     }
@@ -191,7 +178,7 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
     public void onItemUpdate(String sid, String command, JsonObject message) {
         if (itemId != null && itemId.equals(sid)) {
             updateItemStatus();
-            logger.debug("Item got update: " + message.toString());
+            logger.debug("Item got update: {}", message.toString());
 
             JsonObject data = parser.parse(message.get("data").getAsString()).getAsJsonObject();
             String model = message.get("model").getAsString();
@@ -204,6 +191,10 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                     if (data.get("temperature") != null) {
                         float temperature = data.get("temperature").getAsFloat() / 100;
                         updateState(CHANNEL_TEMPERATURE, new DecimalType(temperature));
+                    }
+                    if (data.get("voltage") != null) {
+                        Integer voltage = data.get("voltage").getAsInt();
+                        updateState(CHANNEL_VOLTAGE, new DecimalType(voltage));
                     }
                     break;
                 case "motion":
@@ -236,18 +227,21 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                         updateState(CHANNEL_LOAD_POWER, new DecimalType(data.get("load_power").getAsBigDecimal()));
                     }
                     if (data.has("power_consumed")) {
-                        updateState(CHANNEL_POWER_CONSUMED, new DecimalType(data.get("power_consumed").getAsBigDecimal()));
+                        updateState(CHANNEL_POWER_CONSUMED,
+                                new DecimalType(data.get("power_consumed").getAsBigDecimal()));
                     }
                     break;
                 case "gateway":
                     if (data.has("rgb")) {
                         long rgb = data.get("rgb").getAsLong();
-                        updateState(CHANNEL_BRIGHTNESS, new PercentType((int) (((rgb / 256 / 256 / 256) & 0xff) / 2.55)));
-                        updateState(CHANNEL_COLOR, HSBType.fromRGB((int) (rgb / 256 / 256) & 0xff, (int) (rgb / 256) & 0xff, (int) rgb & 0xff));
+                        updateState(CHANNEL_BRIGHTNESS,
+                                new PercentType((int) (((rgb / 256 / 256 / 256) & 0xff) / 2.55)));
+                        updateState(CHANNEL_COLOR, HSBType.fromRGB((int) (rgb / 256 / 256) & 0xff,
+                                (int) (rgb / 256) & 0xff, (int) rgb & 0xff));
                     }
                     break;
                 case "cube":
-                    System.out.println("Cube data:" + data);
+                    logger.debug("Cube data: {}", data);
                     if (data.has("status")) {
                         triggerChannel("action", data.get("status").getAsString().toUpperCase());
                     } else if (data.has("rotate")) {
@@ -255,6 +249,15 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
                         triggerChannel("action", isRotateLeft ? "ROTATE_LEFT" : "ROTATE_RIGHT");
                     }
                     break;
+            }
+
+            if (data.get("voltage") != null) {
+                Integer voltage = data.get("voltage").getAsInt();
+                updateState(CHANNEL_VOLTAGE, new DecimalType(voltage));
+
+                if (voltage < 2800) {
+                    triggerChannel("batteryLevel", "LOW");
+                }
             }
         }
     }
@@ -270,7 +273,7 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
     }
 
     private void writeBridgeLightColor(long color) {
-        getXiaomiBridgeHandler().writeToBridge(new String[]{"rgb"}, new Object[]{color});
+        getXiaomiBridgeHandler().writeToBridge(new String[] { "rgb" }, new Object[] { color });
     }
 
     private synchronized XiaomiBridgeHandler getXiaomiBridgeHandler() {

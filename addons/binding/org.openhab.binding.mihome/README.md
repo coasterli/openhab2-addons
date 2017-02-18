@@ -12,8 +12,9 @@ In order to connect the Gateway, you need to install MiHome app
 from the [Google Play](https://play.google.com/store/apps/details?id=com.xiaomi.smarthome) or [AppStore](https://itunes.apple.com/app/mi-home-xiaomi-for-your-smarthome/id957323480).
 
 ## How to set up
+
 1. Install the binding
-2. Setup gateway to be discoverable
+2. Setup Gateway to be discoverable
    1. Add Gateway 2 to your WiFi Network
    2. Install Mi Home app from [Google Play](https://play.google.com/store/apps/details?id=com.xiaomi.smarthome) or [AppStore](https://itunes.apple.com/app/mi-home-xiaomi-for-your-smarthome/id957323480)
    3. Set your region to Mainland China under Settings -> Locale (seems to be required)
@@ -32,18 +33,23 @@ from the [Google Play](https://play.google.com/store/apps/details?id=com.xiaomi.
 6. Your sensors should be getting discovered by openHAB as you add and use them.
 
 ## Connecting sub-devices (sensors) to the Gateway
+
 There are two ways of connecting Xiaomi devices to the gateway:
+
 1. Online - within the MiHome App
 2. Offline - manual
+
     * Click 3 times on the Gateway's button
     * Gateway will flash in blue and you will hear female voice in Chinese
     * Place the needle into the sensor and hold it for at least 3 seconds
     * You'll hear confirmation message in Chinese 
     
 ## Important information
-This requires port 9898 to not be used by any other service on the system.
+
+The binding requires port `9898` to not be used by any other service on the system.
 
 ## Full Example
+
 xiaomi.items:
 ```
 TODO
@@ -79,18 +85,18 @@ when
   Channel 'mihome:sensor_cube:<id>:action' triggered
 then
   if (receivedEvent.event == "SHAKE_AIR") {
-    if (YeelightColorLEDBulb_Brightness.state == 0) {
-      sendCommand(YeelightColorLEDBulb_Brightness, ON)
-      sendCommand(YeelightColorLEDBulb_ColorTemperature, 50)
+    if (LEDBulb_Brightness.state == 0) {
+      sendCommand(LEDBulb_Brightness, ON)
+      sendCommand(LEDBulb_ColorTemperature, 50)
     } else {
-      sendCommand(YeelightColorLEDBulb_Brightness, OFF)
+      sendCommand(LEDBulb_Brightness, OFF)
     }
   } else if (receivedEvent.event == "FLIP90") {
-    sendCommand(YeelightColorLEDBulb_Brightness, ON)
-    sendCommand(YeelightColorLEDBulb_ColorTemperature, 10)
+    sendCommand(LEDBulb_Brightness, ON)
+    sendCommand(LEDBulb_ColorTemperature, 10)
   } else if (receivedEvent.event == "FLIP180") {
-    sendCommand(YeelightColorLEDBulb_Brightness, ON)
-    sendCommand(YeelightColorLEDBulb_Color, new HSBType(new DecimalType(90),new PercentType(100),new PercentType(100)))
+    sendCommand(LEDBulb_Brightness, ON)
+    sendCommand(LEDBulb_Color, new HSBType(new DecimalType(90),new PercentType(100),new PercentType(100)))
   }
 end
 
