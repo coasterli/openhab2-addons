@@ -276,6 +276,25 @@ public class XiaomiItemHandler extends BaseThingHandler implements XiaomiItemUpd
         getXiaomiBridgeHandler().writeToBridge(new String[] { "rgb" }, new Object[] { color });
     }
 
+    /**
+     * Play ringtone on Xiaomi Gateway
+     * 0 - 8, 10 - 13, 20 - 29 -- ringtones that come with the system)
+     * > 10001 -- user-defined ringtones
+     *
+     * @param ringtoneId
+     */
+    private void writeBridgeRingtone(int ringtoneId) {
+        getXiaomiBridgeHandler().writeToBridge(new String[] { "mid" }, new Object[] { ringtoneId });
+    }
+
+    /**
+     * Stop playing ringtone on Xiaomi Gateway
+     * by setting "mid" parameter to 10000
+     */
+    private void stopRingtone() {
+        getXiaomiBridgeHandler().writeToBridge(new String[] { "mid" }, new Object[] { 10000 });
+    }
+
     private synchronized XiaomiBridgeHandler getXiaomiBridgeHandler() {
         if (this.bridgeHandler == null) {
             Bridge bridge = getBridge();

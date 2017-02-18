@@ -13,8 +13,8 @@
 
 		<channels>
 			<channel id="isOpen" typeId="isOpen" />
-            <channel id="voltage" typeId="voltage"/>
-            <channel id="batteryLevel" typeId="batteryLevel"/>
+			<channel id="voltage" typeId="voltage" />
+			<channel id="batteryLevel" typeId="batteryLevel" />
 		</channels>
 
 		<config-description>
@@ -33,16 +33,17 @@
 		<state readOnly="true"></state>
 	</channel-type>
 
-	<channel-type id="voltage">
+	<channel-type id="voltage" advanced="true">
 		<item-type>Number</item-type>
 		<label>Battery Voltage</label>
 		<category>Battery Voltage</category>
 		<state pattern="%d mv" readOnly="true"></state>
 	</channel-type>
 
-	<channel-type id="batteryLevel">
+	<channel-type id="batteryLevel" advanced="true">
 		<kind>trigger</kind>
-		<label>Battery Level</label>
+		<label>Low Battery Level</label>
+		<description>Triggers LOW event when voltage is below 2800 mv</description>
 		<event>
 			<options>
 				<option value="LOW">low</option>
