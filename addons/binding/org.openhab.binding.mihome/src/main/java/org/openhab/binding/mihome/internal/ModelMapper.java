@@ -7,20 +7,15 @@
  */
 package org.openhab.binding.mihome.internal;
 
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.*;
+
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_GATEWAY;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_CUBE;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_HT;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MAGNET;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_MOTION;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_PLUG;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_SENSOR_SWITCH;
-
 /**
- * Maps the model (provided from xiaomi) to thing.
+ * Maps the model (provided from Xiaomi) to thing.
  *
  * @author Patrick Boos - Initial contribution
+ * @author Kuba Wolanin - Renamed labels
  */
 public class ModelMapper {
 
@@ -47,19 +42,19 @@ public class ModelMapper {
     public static String getLabelForModel(String model) {
         switch (model) {
             case "gateway":
-                return "Gateway";
+                return "Xiaomi Mi Smart Home Gateway";
             case "sensor_ht":
-                return "Temperature & Humidity Sensor";
+                return "Xiaomi Mi Temperature & Humidity Sensor";
             case "motion":
-                return "Motion Sensor";
+                return "Xiaomi Mi Motion Sensor";
             case "magnet":
-                return "Open/close Sensor";
+                return "Xiaomi Door/Window Sensor";
             case "switch":
-                return "Button";
+                return "Xiaomi Mi Wireless Switch";
             case "plug":
-                return "Plug";
+                return "Xiaomi Mi Smart Socket Plug";
             case "cube":
-                return "Magic Controller (Cube)";
+                return "Xiaomi Mi Smart Cube";
         }
         return null;
     }

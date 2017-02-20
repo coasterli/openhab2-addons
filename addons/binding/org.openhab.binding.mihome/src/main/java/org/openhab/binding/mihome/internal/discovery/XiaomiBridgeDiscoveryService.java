@@ -7,7 +7,15 @@
  */
 package org.openhab.binding.mihome.internal.discovery;
 
-import com.google.gson.JsonObject;
+import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -17,22 +25,13 @@ import org.openhab.binding.mihome.internal.socket.XiaomiSocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.HOST;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.PORT;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.SERIAL_NUMBER;
-import static org.openhab.binding.mihome.XiaomiGatewayBindingConstants.THING_TYPE_BRIDGE;
+import com.google.gson.JsonObject;
 
 /**
- * Discovery service for the xiaomi bridge.
+ * Discovery service for the Xiaomi bridge.
  *
  * @author Patrick Boos - Initial contribution
+ * @author Kuba Wolanin - logger fixes
  */
 public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService implements XiaomiSocketListener {
 
@@ -98,19 +97,16 @@ public class XiaomiBridgeDiscoveryService extends AbstractDiscoveryService imple
         properties.put(HOST, ipAddress);
         properties.put(PORT, port);
 
-        logger.debug("Discovered Xiaomi Gateway - sid: " + serialNumber + " ip: " + ipAddress + " port: " + port);
+        logger.debug("Discovered Xiaomi Gateway - sid: {} ip: {} port: {}", serialNumber, ipAddress, port);
 
         ThingUID thingUID = new ThingUID(THING_TYPE_BRIDGE, serialNumber);
-        thingDiscovered(DiscoveryResultBuilder.create(thingUID)
-                .withThingType(THING_TYPE_BRIDGE)
-                .withProperties(properties)
-                .withLabel("Xiaomi Gateway")
-                .withRepresentationProperty(SERIAL_NUMBER)
-                .build());
+        thingDiscovered(
+                DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_BRIDGE).withProperties(properties)
+                        .withLabel("Xiaomi Gateway").withRepresentationProperty(SERIAL_NUMBER).build());
 
-//        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
-//                .withProperties(properties).withBridge(bridgeUID).withLabel(light.getName()).build();
-//        thingDiscovered(discoveryResult);
-//        return new ThingUID(thingTypeUID, bridgeUID, light.getId());
+        // DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+        // .withProperties(properties).withBridge(bridgeUID).withLabel(light.getName()).build();
+        // thingDiscovered(discoveryResult);
+        // return new ThingUID(thingTypeUID, bridgeUID, light.getId());
     }
 }

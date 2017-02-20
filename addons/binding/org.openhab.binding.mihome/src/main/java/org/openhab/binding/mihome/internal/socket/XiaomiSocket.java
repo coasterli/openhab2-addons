@@ -7,11 +7,6 @@
  */
 package org.openhab.binding.mihome.internal.socket;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -20,6 +15,12 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 /**
  * Takes care of the communication with the bridge.
  *
@@ -27,7 +28,7 @@ import java.util.List;
  */
 public class XiaomiSocket {
     private static final int BUFFER_LENGTH = 1024;
-    //private final int DEST_PORT = 9898;
+    // private final int DEST_PORT = 9898;
     private static final String MCAST_ADDR = "224.0.0.50";
     private static final int MCAST_PORT = 4321;
     private static final int DEFAULT_PORT = 9898;
@@ -63,10 +64,11 @@ public class XiaomiSocket {
         synchronized (XiaomiSocket.class) {
             try {
                 logger.debug("Setup socket");
-                // TODO check if this can be any port. if yes, than we can have a socket for each discovery, and each bridge
+                // TODO check if this can be any port. if yes, than we can have a socket for each discovery, and each
+                // bridge
                 socket = new MulticastSocket(DEFAULT_PORT); // must bind receive side
                 socket.joinGroup(InetAddress.getByName(MCAST_ADDR));
-                logger.debug("network interface: " + socket.getNetworkInterface().getName());
+                logger.debug("network interface: {}", socket.getNetworkInterface().getName());
             } catch (IOException e) {
                 logger.error("Setup socket error", e);
             }
@@ -102,13 +104,14 @@ public class XiaomiSocket {
             byte[] sendData = message.getBytes("UTF-8");
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, address, port);
             socket.send(sendPacket);
-            logger.debug("Sent message: " + message);
+            logger.debug("Sent message: {}", message);
         } catch (IOException e) {
             logger.error("Sending error", e);
         }
     }
 
     private static class ReceiverThread extends Thread {
+        @Override
         public void run() {
             receiveData(socket, datagramPacket);
         }

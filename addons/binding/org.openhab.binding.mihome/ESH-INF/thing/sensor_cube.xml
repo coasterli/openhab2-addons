@@ -9,8 +9,8 @@
             <bridge-type-ref id="bridge"/>
         </supported-bridge-type-refs>
 
-        <label>Cube</label>
-        <description>Magic Controller (Cube)</description>
+        <label>Xiaomi Mi Smart Cube</label>
+        <description>Multifunctional controller equipped with an accelerometer and a gyroscope. Triggers the following actions: move, rotate, rotate, flip 90, flip 180, tap twice, shake air, free fall, alert.</description>
 
         <channels>
             <channel id="action" typeId="action"/>
@@ -25,7 +25,7 @@
         </config-description>
     </thing-type>
 
-    <channel-type id="action" advanced="true">
+    <channel-type id="action">
         <kind>trigger</kind>
         <label>Cube event</label>
         <event>
