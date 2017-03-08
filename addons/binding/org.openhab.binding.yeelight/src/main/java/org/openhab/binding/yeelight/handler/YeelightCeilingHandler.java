@@ -109,7 +109,7 @@ public class YeelightCeilingHandler extends YeelightHandlerBase {
         } else {
             updateState(YeelightBindingConstants.CHANNEL_BRIGHTNESS, new PercentType(status.getBrightness()));
             updateState(YeelightBindingConstants.CHANNEL_COLOR_TEMPERATURE,
-                    new PercentType((status.getCt() - 1700) / 48));
+                    new PercentType((status.getCt() - 2700) / 38));
         }
 
     }
