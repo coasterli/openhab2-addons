@@ -78,8 +78,12 @@ public class HomematicBridgeHandler extends BaseBridgeHandler implements Homemat
                     discoveryService.startScan(null);
                     discoveryService.waitForScanFinishing();
                     updateStatus(ThingStatus.ONLINE);
-                    for (Thing hmThing : getThing().getThings()) {
-                        hmThing.getHandler().thingUpdated(hmThing);
+                    if (!config.getGatewayInfo().isHomegear()) {
+                        try {
+                            gateway.loadRssiValues();
+                        } catch (IOException ex) {
+                            logger.warn("Unable to load RSSI values from bridge '{}'", getThing().getUID().getId());
+                        }
                     }
                 }
             });
@@ -128,18 +132,20 @@ public class HomematicBridgeHandler extends BaseBridgeHandler implements Homemat
      * Registers the DeviceDiscoveryService.
      */
     private void registerDeviceDiscoveryService() {
-        logger.trace("Registering HomematicDeviceDiscoveryService for bridge '{}'", getThing().getUID().getId());
-        discoveryService = new HomematicDeviceDiscoveryService(this);
-        discoveryServiceRegistration = bundleContext.registerService(DiscoveryService.class.getName(), discoveryService,
-                new Hashtable<String, Object>());
-        discoveryService.activate();
+        if (bundleContext != null) {
+            logger.trace("Registering HomematicDeviceDiscoveryService for bridge '{}'", getThing().getUID().getId());
+            discoveryService = new HomematicDeviceDiscoveryService(this);
+            discoveryServiceRegistration = bundleContext.registerService(DiscoveryService.class.getName(),
+                    discoveryService, new Hashtable<String, Object>());
+            discoveryService.activate();
+        }
     }
 
     /**
      * Unregisters the DeviceDisoveryService.
      */
     private void unregisterDeviceDiscoveryService() {
-        if (discoveryServiceRegistration != null) {
+        if (discoveryServiceRegistration != null && bundleContext != null) {
             HomematicDeviceDiscoveryService service = (HomematicDeviceDiscoveryService) bundleContext
                     .getService(discoveryServiceRegistration.getReference());
             service.deactivate();
@@ -158,7 +164,9 @@ public class HomematicBridgeHandler extends BaseBridgeHandler implements Homemat
             try {
                 gateway.getDevice(UidUtils.getHomematicAddress(hmThing));
             } catch (HomematicClientException e) {
-                ((HomematicThingHandler) hmThing.getHandler()).updateStatus(ThingStatus.OFFLINE);
+                if (hmThing.getHandler() != null) {
+                    ((HomematicThingHandler) hmThing.getHandler()).updateStatus(ThingStatus.OFFLINE);
+                }
             }
         }
     }
@@ -215,7 +223,7 @@ public class HomematicBridgeHandler extends BaseBridgeHandler implements Homemat
      */
     public void updateThing(HmDevice device) {
         Thing hmThing = getThingByUID(UidUtils.generateThingUID(device, getThing()));
-        if (hmThing != null) {
+        if (hmThing != null && hmThing.getHandler() != null) {
             hmThing.getHandler().thingUpdated(hmThing);
         }
     }
@@ -291,10 +299,10 @@ public class HomematicBridgeHandler extends BaseBridgeHandler implements Homemat
      */
     @Override
     public void reloadDeviceValues(HmDevice device) {
+        updateThing(device);
         if (device.isGatewayExtras()) {
             typeGenerator.generate(device);
         }
-        updateThing(device);
     }
 
     /**
